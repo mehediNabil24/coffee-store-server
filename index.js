@@ -88,6 +88,13 @@ async function run() {
 
     })
 
+    // user related api
+    app.get('/users', async(req,res)=>{
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
     app.post('/users', async(req,res)=>{
       const newUser = req.body;
       console.log('creating new user', newUser)
@@ -96,6 +103,25 @@ async function run() {
 
       res.send(result)
 
+    })
+
+    app.delete('/users/:id',async(req,res)=>{
+      const id =req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await userCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    app.patch('/users',async(req,res)=>{
+      const email = req.body.email;
+      const filter ={email}
+      const updatedDoc = {
+        $set: {
+          lastSignInTime : req.body?.lastSignInTime
+        }
+      }
+      const result = await userCollection.updateOne(filter,updatedDoc)
+      res.send(result)
     })
     
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
