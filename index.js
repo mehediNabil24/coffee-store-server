@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
 
     const coffeeCollection = client.db('coffeeDB').collection('coffee')
+    const userCollection =client.db('coffeeDB').collection('users')
 
     app.get('/',(req,res)=>{
         res.send("Coffee server is running")
@@ -57,10 +58,42 @@ async function run() {
         res.send(result);
     })
 
+    app.put('/coffee/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const updatedCoffee = req.body;
+      const options = {upsert:true};
+      const updateCoffee ={
+        $set:{
+          name: updatedCoffee.name,
+          quantity: updatedCoffee.quantity,
+          supplier: updatedCoffee.supplier,
+          taste: updatedCoffee.taste,
+          category: updatedCoffee.category,
+          details: updatedCoffee.details,
+          photo: updatedCoffee.photo
+
+        }
+      }
+
+      const result =await coffeeCollection.updateOne(filter, updateCoffee,options);
+      res.send(result) 
+    })
+
     app.delete('/coffee/:id',async(req,res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const result = await coffeeCollection.deleteMany(query)
+      res.send(result)
+
+    })
+
+    app.post('/users', async(req,res)=>{
+      const newUser = req.body;
+      console.log('creating new user', newUser)
+
+      const result = await userCollection.insertOne(newUser)
+
       res.send(result)
 
     })
